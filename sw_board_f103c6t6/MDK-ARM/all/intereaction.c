@@ -16,19 +16,6 @@
 
 switches_t switches = {
 	false,
-	false,
-	false,
-	false,
-	false,
-	false,
-	false,
-	false,
-	true,
-	false,
-	false,
-	false,
-	false,
-	false,
 	};
 int32_t stop_count = 0;
 int32_t start_count = 0;
@@ -42,16 +29,31 @@ acknowledge_t ack = {false};
 void intereaction_scan_sw(void) {
 	switches_t *s = &switches;
 	//视觉启动 自检 决策点 轮询读按键 
-	if (HAL_GPIO_ReadPin(VISION_START_1_GPIO_Port, VISION_START_1_Pin) == GPIO_PIN_SET) {
-		s->vision_start_1 = true;
-	} else {
-		s->vision_start_1 = false;
-	}
-	if (HAL_GPIO_ReadPin(VISION_START_2_GPIO_Port, VISION_START_2_Pin) == GPIO_PIN_SET) {
-		s->vision_start_1 = true;
-	} else {
-		s->vision_start_1 = false;
-	}
+//	if (HAL_GPIO_ReadPin(VISION_START_1_GPIO_Port, VISION_START_1_Pin) == GPIO_PIN_SET) {
+//		s->vision_start_1 = true;
+//	} else {
+//		s->vision_start_1 = false;
+//	}
+//	if (HAL_GPIO_ReadPin(VISION_START_2_GPIO_Port, VISION_START_2_Pin) == GPIO_PIN_SET) {
+//		s->vision_start_1 = true;
+//	} else {
+//		s->vision_start_1 = false;
+//	}
+  if (s->vision_start_1) {
+    osDelay(50);
+    if (HAL_GPIO_ReadPin(VISION_START_1_GPIO_Port, VISION_START_1_Pin) == GPIO_PIN_SET) {
+      intereaction_send_can_message(6);
+    }
+    s->vision_start_1 = false;
+  }
+  if (s->vision_start_2) {
+    osDelay(50);
+    if (HAL_GPIO_ReadPin(VISION_START_2_GPIO_Port, VISION_START_2_Pin) == GPIO_PIN_SET) {
+      intereaction_send_can_message(4);
+    }
+    s->vision_start_2  = false;
+  }
+  
 	if (HAL_GPIO_ReadPin(SELF_CHECK_GPIO_Port, SELF_CHECK_Pin) == GPIO_PIN_SET) {
 		s->self_check = true;
 	} else {
@@ -67,11 +69,11 @@ void intereaction_scan_sw(void) {
 	}
 	
 	//读启动按钮状态，调试用
-	if (HAL_GPIO_ReadPin(STOP_GPIO_Port, STOP_Pin) == GPIO_PIN_SET || HAL_GPIO_ReadPin(STOP_2_GPIO_Port, STOP_2_Pin) == GPIO_PIN_SET) {
-		s->stop = true;
-	} else {
-		s->stop = false;
-	}
+//	if (HAL_GPIO_ReadPin(STOP_GPIO_Port, STOP_Pin) == GPIO_PIN_SET || HAL_GPIO_ReadPin(STOP_2_GPIO_Port, STOP_2_Pin) == GPIO_PIN_SET) {
+//		s->stop = true;
+//	} else {
+//		s->stop = false;
+//	}
 
 	//轮询读红蓝区
 	if (HAL_GPIO_ReadPin(BLUE_AREA_GPIO_Port, BLUE_AREA_Pin) == GPIO_PIN_SET) {
@@ -267,41 +269,62 @@ void intereacion_dt35_offline_check (void) {
 		dt35_offline_id = 6;
 	}
 	else dt35_offline_id = 0;
-	for (int i = dt35_offline_count; i; i--) {
-		ws2812_set_color_1(255/3,23/3,49/3, 1);
-		ws2812_send_buffer1();
-		osDelay(400);
-		ws2812_set_color_1(128/3,224/3,0, 1);
-		ws2812_send_buffer1();
-		osDelay(400);
-	}
+  if (dt35_offline_id > 0) {
+    for (int i = dt35_offline_id; i; i--) {
+      ws2812_set_color_1(255/3,23/3,49/3, 1);
+      ws2812_send_buffer1();
+      osDelay(200);
+      ws2812_set_color_1(128/3,224/3,0, 1);
+      ws2812_send_buffer1();
+      osDelay(200);
+      }
+      osDelay(500);
+    }
 }
 
 /*****************************RGB控制**************************** */
 
 void intereacion_led_control (void) {
-	if (ack.chassis_com_ack) {
+//	if (ack.chassis_com_ack) {
+//		HAL_GPIO_WritePin(CHASSIS_LED_GPIO_Port, CHASSIS_LED_Pin, GPIO_PIN_SET);
+//	} else {
+//		HAL_GPIO_WritePin(CHASSIS_LED_GPIO_Port, CHASSIS_LED_Pin, GPIO_PIN_RESET);
+//	}
+
+//	if (ack.take_in_com_ack) {
+//		HAL_GPIO_WritePin(TAKE_IN_LED_GPIO_Port, TAKE_IN_LED_Pin, GPIO_PIN_SET);
+//	} else {
+//		HAL_GPIO_WritePin(TAKE_IN_LED_GPIO_Port, TAKE_IN_LED_Pin, GPIO_PIN_RESET);
+//	}
+
+//	if (ack.robotoc_arm_com_ack) {
+//		HAL_GPIO_WritePin(ROBOTIC_ARM_LED_GPIO_Port, ROBOTIC_ARM_LED_Pin, GPIO_PIN_SET);
+//	} else {
+//		HAL_GPIO_WritePin(ROBOTIC_ARM_LED_GPIO_Port, ROBOTIC_ARM_LED_Pin, GPIO_PIN_RESET);
+//	}
+  //6.22风水轮流转版本
+	if (ack.robotoc_arm_com_ack) {
 		HAL_GPIO_WritePin(CHASSIS_LED_GPIO_Port, CHASSIS_LED_Pin, GPIO_PIN_SET);
 	} else {
 		HAL_GPIO_WritePin(CHASSIS_LED_GPIO_Port, CHASSIS_LED_Pin, GPIO_PIN_RESET);
 	}
 
-	if (ack.usb2can_com_ack) {
-		HAL_GPIO_WritePin(COMM_LED_GPIO_Port, COMM_LED_Pin, GPIO_PIN_SET);
-	} else {
-		HAL_GPIO_WritePin(COMM_LED_GPIO_Port, COMM_LED_Pin, GPIO_PIN_RESET);
-	}
-
-	if (ack.take_in_com_ack) {
+	if (ack.chassis_com_ack) {
 		HAL_GPIO_WritePin(TAKE_IN_LED_GPIO_Port, TAKE_IN_LED_Pin, GPIO_PIN_SET);
 	} else {
 		HAL_GPIO_WritePin(TAKE_IN_LED_GPIO_Port, TAKE_IN_LED_Pin, GPIO_PIN_RESET);
 	}
 
-	if (ack.robotoc_arm_com_ack) {
+	if (ack.take_in_com_ack) {
 		HAL_GPIO_WritePin(ROBOTIC_ARM_LED_GPIO_Port, ROBOTIC_ARM_LED_Pin, GPIO_PIN_SET);
 	} else {
 		HAL_GPIO_WritePin(ROBOTIC_ARM_LED_GPIO_Port, ROBOTIC_ARM_LED_Pin, GPIO_PIN_RESET);
+	}
+  
+	if (ack.usb2can_com_ack) {
+		HAL_GPIO_WritePin(COMM_LED_GPIO_Port, COMM_LED_Pin, GPIO_PIN_SET);
+	} else {
+		HAL_GPIO_WritePin(COMM_LED_GPIO_Port, COMM_LED_Pin, GPIO_PIN_RESET);
 	}
 
 	intereacion_dt35_offline_check();

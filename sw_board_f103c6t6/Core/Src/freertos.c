@@ -158,7 +158,7 @@ void StartDefaultTask(void const * argument)
 void CAN_send(void const * argument)
 {
   /* USER CODE BEGIN CAN_send */
-  static period_count = 0;
+  static int period_count = 0;
   /* Infinite loop */
   for(;;)
   {
@@ -176,7 +176,7 @@ void CAN_send(void const * argument)
       }
     }
     else if (switches.stop_send_trigger) {
-      switches.stop_send_trigger = false;
+       switches.stop_send_trigger = false;
       for (int i = 30; i; i--) {
         intereaction_send_can_message(2);
         osDelay(1);

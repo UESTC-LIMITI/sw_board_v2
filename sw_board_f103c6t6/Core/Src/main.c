@@ -104,6 +104,7 @@ int main(void)
   delay_us_init();
   ws2812_set_color_1(128/3,224/3,0, 1);
   ws2812_send_buffer1();
+  switches.start = true; //让第�?次按下变成stop
   HAL_TIM_Base_Start_IT(&htim3);
   /* USER CODE END 2 */
 
@@ -177,6 +178,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
       // HAL_TIM_Base_Start_IT(&htim3);
     }
   }
+  else if (GPIO_Pin == VISION_START_1_Pin) {
+    switches.vision_start_1 = true;
+  }
+  else if (GPIO_Pin == VISION_START_2_Pin) {
+    switches.vision_start_2 = true;    
+  }
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -209,6 +216,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
   if (htim == &htim3) {
+    if (start_count > 0) {
       if (HAL_GPIO_ReadPin(STOP_GPIO_Port, STOP_Pin) == GPIO_PIN_SET || HAL_GPIO_ReadPin(STOP_2_GPIO_Port, STOP_2_Pin) == GPIO_PIN_SET) {
         start_count--;
         if (start_count <= 0) {
@@ -232,8 +240,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       }
       else {stop_count = 0;}
     }
-
   }
+
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM1) {
     HAL_IncTick();
