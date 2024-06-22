@@ -1,84 +1,80 @@
-#include "can.h"
 #include "can_bsp.h"
-#include "main.h"
+#include <string.h>
 
-/*初始化CAN*/
+CAN_TxHeaderTypeDef TxHeader;
+CAN_RxHeaderTypeDef RxHeader;
+static uint8_t TxData[8];
+uint8_t FreeTxNum;
+uint32_t TxMailbox = 0;
+
 void CAN_Init(void)
 {
-    CAN_FilterTypeDef sFilterConfig;
-    HAL_StatusTypeDef HAL_Status;
-    /*这里默认CAN1和CAN2使用不同的FIFO*/
-        sFilterConfig.FilterBank = 0;                     // 过滤器组
-        sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK; // CAN_FILTERMODE_IDLIST  CAN_FILTERMODE_IDMASK
-        sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-        sFilterConfig.FilterIdHigh = 0x0000; // filter id
-        sFilterConfig.FilterIdLow = 0x0000;
-        sFilterConfig.FilterMaskIdHigh = 0x0000;
-        sFilterConfig.FilterMaskIdLow = 0x0000;
-        sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0; // 用FIFO接收
-        sFilterConfig.FilterActivation = ENABLE;
-        sFilterConfig.SlaveStartFilterBank = 1;
+	CAN_FilterTypeDef  sFilterConfig;
+	sFilterConfig.FilterBank = 0;
+	sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+	sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+	sFilterConfig.FilterIdHigh = 0x0000;
+	sFilterConfig.FilterIdLow = 0x0000;
+	sFilterConfig.FilterMaskIdHigh = 0x0000;
+	sFilterConfig.FilterMaskIdLow = 0x0000;
+	sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+	sFilterConfig.FilterActivation = ENABLE;
+	sFilterConfig.SlaveStartFilterBank = 14; // meaningless
+	if (HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK)
+	{
+		/* Filter configuration Error */
+		Error_Handler();
+	}
 
-        HAL_CAN_ConfigFilter(&hcan, &sFilterConfig);
-        HAL_CAN_Start(&hcan); // 开启CAN
-        HAL_Status = HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
+	if (HAL_CAN_Start(&hcan) != HAL_OK)
+	{
+		/* Start Error */
+		Error_Handler();
+	}
+	
+	if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK)
+	{
+		/* Activation Error */
+		Error_Handler();
+	}
+	
+	
+	TxHeader.StdId = 0x00;
+	TxHeader.IDE = CAN_ID_STD;
+	TxHeader.RTR = CAN_RTR_DATA;
+	TxHeader.DLC = 8; 
+	TxHeader.TransmitGlobalTime = DISABLE;
 }
 
-/*CAN发送函数*/
-uint8_t CAN_SendData(CAN_HandleTypeDef *hcan, uint8_t *pData, uint16_t ID, uint32_t lenth)
+void CAN_Send_Message(uint32_t ID, uint8_t* data, uint8_t len)
 {
-    HAL_StatusTypeDef HAL_RetVal = HAL_ERROR;
-    CAN_TxHeaderTypeDef TxMessage;
-    uint32_t TxMailboxX = CAN_TX_MAILBOX0; // CAN发送邮箱
-
-    TxMessage.StdId = ID;
-    TxMessage.DLC = lenth; /*默认一帧传输长度为8*/
-    TxMessage.IDE = CAN_ID_STD;
-    TxMessage.RTR = CAN_RTR_DATA;
-
-    while (!HAL_CAN_GetTxMailboxesFreeLevel(hcan)) // 等待空邮箱
-        ;
-    if ((hcan->Instance->TSR & CAN_TSR_TME0) != RESET) // 检查发送邮箱状态
-        TxMailboxX = CAN_TX_MAILBOX0;
-    else if ((hcan->Instance->TSR & CAN_TSR_TME1) != RESET)
-        TxMailboxX = CAN_TX_MAILBOX1;
-    else if ((hcan->Instance->TSR & CAN_TSR_TME2) != RESET)
-        TxMailboxX = CAN_TX_MAILBOX2;
-
-    HAL_RetVal = HAL_CAN_AddTxMessage(hcan, &TxMessage, pData, (uint32_t *)TxMailboxX);
-
-    if (HAL_RetVal != HAL_OK)
-    {
-        return 2;
-    }
-
-    return 0;
+	memcpy(TxData, data, len);
+	
+	TxHeader.StdId = ID;
+	TxHeader.DLC = (uint32_t)len;
+	
+	FreeTxNum = HAL_CAN_GetTxMailboxesFreeLevel(&hcan);
+	
+	while (FreeTxNum == 0) 
+	{
+		/* If no free Tx Mailboxes, clear this request */
+		HAL_CAN_AbortTxRequest(&hcan,TxMailbox);
+		FreeTxNum = HAL_CAN_GetTxMailboxesFreeLevel(&hcan);
+	}
+	
+	if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox) != HAL_OK)
+	{
+		/* Transmission request Error */
+		Error_Handler();
+	}
 }
 
-///*FIFO0的回调函数*/
-// void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
-//{
-//	if(hcan->Instance == hcan1.Instance)
-//	{
-//		CAN_RxHeaderTypeDef RxMessage;
-//	uint8_t RxData[8] = {0};
-//
-//	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxMessage, RxData);
-//	/*自己写解析函数*/
-//
-//	}
-// }
-
-///*FIFO0的回调函数*/
-// void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
-//{
-//	if(hcan->Instance == hcan2.Instance)
-//	{
-//		CAN_RxHeaderTypeDef RxMessage;
-//	uint8_t RxData[8] = {0};
-//
-//	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxMessage, RxData);
-//	/*自己写解析函数*/
-//
-//	}
-// }
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+	uint8_t RxData[8];
+	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
+	{
+		/* Reception Error */
+		Error_Handler();
+	}
+}

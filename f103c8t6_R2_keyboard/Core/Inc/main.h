@@ -31,18 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-/**
- * 外设使用情况：
- * timer3 -> stop_1
- * timer4 -> start_1
- * timer1 -> stop_2
- * timer2 -> start_2
- * s7 -> 备用急停
- * s2 -> 红蓝区
- * s3 -> 通信自检和各设备自检
- * s5 -> 视觉一区启动
- * s6 -> 视觉二区启动 
- */
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -85,10 +74,12 @@ void Error_Handler(void);
 #define STOP_EXTI_IRQn EXTI4_IRQn
 #define DESICION_Pin GPIO_PIN_5
 #define DESICION_GPIO_Port GPIOB
-#define SW1_Pin GPIO_PIN_7
-#define SW1_GPIO_Port GPIOB
-#define SW2_Pin GPIO_PIN_8
-#define SW2_GPIO_Port GPIOB
+#define SELF_CHECK_Pin GPIO_PIN_6
+#define SELF_CHECK_GPIO_Port GPIOB
+#define VISION_START_1_Pin GPIO_PIN_7
+#define VISION_START_1_GPIO_Port GPIOB
+#define VISION_START_2_Pin GPIO_PIN_8
+#define VISION_START_2_GPIO_Port GPIOB
 #define STOP_2_Pin GPIO_PIN_9
 #define STOP_2_GPIO_Port GPIOB
 

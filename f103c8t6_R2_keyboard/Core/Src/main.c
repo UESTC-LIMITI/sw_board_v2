@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "can.h"
 #include "dma.h"
 #include "tim.h"
@@ -28,6 +29,8 @@
 #include "can_bsp.h"
 #include "intereaction.h"
 #include "utils.h"
+#include "ws2812.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,13 +56,14 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint32_t period_send_count = 0;
+
 /* USER CODE END 0 */
 
 /**
@@ -93,15 +97,27 @@ int main(void)
   MX_DMA_Init();
   MX_CAN_Init();
   MX_TIM2_Init();
-  MX_TIM3_Init();
-  MX_TIM4_Init();
+//  MX_TIM4_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   CAN_Init();
   delay_us_init();
-  
+  ws2812_set_color_1(128/3,224/3,0, 1);
+  ws2812_send_buffer1();
+  HAL_TIM_Base_Start_IT(&htim1);
+
   /* USER CODE END 2 */
 
+  /* Init scheduler */
+  osKernelInitialize();
+
+  /* Call init function for freertos objects (in freertos.c) */
+  MX_FREERTOS_Init();
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -109,28 +125,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-      HAL_Delay(1);
-      period_send_count++;
-      if (period_send_count >= 1500) {
-        intereaction_send_can_message(5);
-      }
-      intereaction_scan_sw();
-      while(stop_count_1 != 0 && stop_count_1 <= 100 && switches.stop_1) {
-      intereaction_send_can_message(2);
-      delay_us(2);
-      }
-      while(start_count_1 != 0 && switches.start_1 && start_count_1 <= 300) {
-      intereaction_send_can_message(1);
-      delay_us(2);
-      }
-      while(stop_count_2 != 0 && stop_count_2 <= 100 && switches.stop_2) {
-      intereaction_send_can_message(2);
-      delay_us(2);
-      }
-      while(start_count_2 != 0 && switches.start_2 && start_count_2 <= 300) {
-      intereaction_send_can_message(1);
-      delay_us(2);
-      }
   }
   /* USER CODE END 3 */
 }
@@ -177,113 +171,95 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  if (GPIO_Pin == STOP_Pin) {
-    if (switches.stop_1) {
+  if (GPIO_Pin == STOP_Pin || GPIO_Pin == STOP_2_Pin) {
+    if (switches.stop) {
+      start_count = 30;
+      ack.chassis_config_ack = false;
       HAL_TIM_Base_Start_IT(&htim4);
-      ack.chassis_config_ack = false;
-    } else if (switches.start_1) {
-      HAL_TIM_Base_Start_IT(&htim3);
+    } else if (switches.start) {
+      stop_count = 30;
+      HAL_TIM_Base_Start_IT(&htim4);
     }
   }
-  if (GPIO_Pin == STOP_2_Pin) {
-    if (switches.stop_2) {
-      HAL_TIM_Base_Start_IT(&htim2);
-      ack.chassis_config_ack = false;
-    } else if (switches.start_2) {
-      HAL_TIM_Base_Start_IT(&htim1);
-    }
-  }
-
+  // if (GPIO_Pin == STOP_2_Pin) {
+  //   if (switches.stop_2) {
+  //     HAL_TIM_Base_Start_IT(&htim2);
+  //     ack.chassis_config_ack = false;
+  //   } else if (switches.start_2) {
+  //   }
+  // }
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  switches_t *s = &switches;
-  static uint32_t timer2_count = 0;
-  if(htim == &htim1) {
-    if (HAL_GPIO_ReadPin(STOP_2_GPIO_Port, STOP_2_Pin) == GPIO_PIN_RESET) {
-      stop_count_2++;
-      if (stop_count_2 > 30) {
-//        intereaction_send_can_message(2);
- 		    s->stop_2 = true;
-		    s->start_2 = false;
-      }
-      if (stop_count_2 >= 100) {
-        stop_count_2 = 0;
-        HAL_TIM_Base_Stop_IT(&htim1);
-      }
-    }
-    else {
-      stop_count_2 = 0;
-      HAL_TIM_Base_Stop_IT(&htim1);
-    }
-  }
+// void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+// {
+//   switches_t *s = &switches;
+//   static uint32_t timer2_count = 0;
 
-  if(htim == &htim2) {
-    if (timer2_count < 800) {
-      timer2_count++;
-      return;
-    }
-    else {
-      timer2_count = 0;
-      if (HAL_GPIO_ReadPin(STOP_2_GPIO_Port, STOP_2_Pin) == GPIO_PIN_RESET) {
-        start_count_2++;
-        if (start_count_2 > 30) {
-          //intereaction_send_can_message(2);
-          s->stop_2 = false;
-          s->start_2 = true;
-        }
-        if (start_count_2 >= 100) {
-          start_count_2 = 0;
-          HAL_TIM_Base_Stop_IT(&htim2);
-        }
-      }
-      else {
-        start_count_2 = 0;
-        HAL_TIM_Base_Stop_IT(&htim2);
-      }
-    }
+//   if(htim == &htim2) {
+//     if (timer2_count < 800) {
+//       timer2_count++;
+//       return;
+//     }
+//     else {
+//       timer2_count = 0;
+//       if (HAL_GPIO_ReadPin(STOP_2_GPIO_Port, STOP_2_Pin) == GPIO_PIN_RESET) {
+//         start_count_2++;
+//         if (start_count_2 > 30) {
+//           //intereaction_send_can_message(2);
+//           s->stop_2 = false;
+//           s->start_2 = true;
+//         }
+//         if (start_count_2 >= 100) {
+//           start_count_2 = 0;
+//           HAL_TIM_Base_Stop_IT(&htim2);
+//         }
+//       }
+//       else {
+//         start_count_2 = 0;
+//         HAL_TIM_Base_Stop_IT(&htim2);
+//       }
+//     }
 
-  }
+//   }
 
-  if(htim == &htim3) {
-    if (HAL_GPIO_ReadPin(STOP_GPIO_Port, STOP_Pin) == GPIO_PIN_RESET) {
-      stop_count_1++;
-      if (stop_count_1 > 30) {
-//        intereaction_send_can_message(2);
-        s->stop_1 = true;
-        s->start_1 = false;
-     }
-      if (stop_count_1 >= 100) {
-        stop_count_1 = 0;
-        HAL_TIM_Base_Stop_IT(&htim3);
-      }
-    }
-    else {
-      stop_count_1 = 0;
-      HAL_TIM_Base_Stop_IT(&htim3);
-    }
-  }
+//   if(htim == &htim3) {
+//     if (HAL_GPIO_ReadPin(STOP_GPIO_Port, STOP_Pin) == GPIO_PIN_RESET) {
+//       stop_count_1++;
+//       if (stop_count_1 > 30) {
+// //        intereaction_send_can_message(2);
+//         s->stop_1 = true;
+//         s->start_1 = false;
+//      }
+//       if (stop_count_1 >= 100) {
+//         stop_count_1 = 0;
+//         HAL_TIM_Base_Stop_IT(&htim3);
+//       }
+//     }
+//     else {
+//       stop_count_1 = 0;
+//       HAL_TIM_Base_Stop_IT(&htim3);
+//     }
+//   }
 
-  if(htim == &htim4) {
-    if (HAL_GPIO_ReadPin(STOP_GPIO_Port, STOP_Pin) == GPIO_PIN_SET) {
-      start_count_1++;
-      if (start_count_1 > 30) {
-		s->stop_1 = false;
-		s->start_1 = true;
-//        intereaction_send_can_message(1);
-      }
-      if (ack.chassis_config_ack || start_count_1 >= 300) {
-        start_count_1 = 0;
-        HAL_TIM_Base_Stop_IT(&htim4);
-      }
-    }
-    else {
-      start_count_1 = 0;
-      HAL_TIM_Base_Stop_IT(&htim4);
-    }
-  }
-}
+//   if(htim == &htim4) {
+//     if (HAL_GPIO_ReadPin(STOP_GPIO_Port, STOP_Pin) == GPIO_PIN_SET) {
+//       start_count_1++;
+//       if (start_count_1 > 30) {
+// 		s->stop_1 = false;
+// 		s->start_1 = true;
+// //        intereaction_send_can_message(1);
+//       }
+//       if (ack.chassis_config_ack || start_count_1 >= 300) {
+//         start_count_1 = 0;
+//         HAL_TIM_Base_Stop_IT(&htim4);
+//       }
+//     }
+//     else {
+//       start_count_1 = 0;
+//       HAL_TIM_Base_Stop_IT(&htim4);
+//     }
+//   }
+// }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {	
@@ -293,6 +269,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	  HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxMessage, RxData);	
     
     intereacion_can_decode (RxMessage.StdId, RxData);
+}
+
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef* htim) {
+     if (htim == &RGB_TIMER) {
+       HAL_TIM_PWM_Stop_DMA(htim, RGB_CHANNEL_1);
+     }
 }
 
 /* USER CODE END 4 */

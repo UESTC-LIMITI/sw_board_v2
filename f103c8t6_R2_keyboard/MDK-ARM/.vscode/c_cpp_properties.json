@@ -3,15 +3,20 @@
         {
             "name": "f103c8t6_R2_keyboard",
             "includePath": [
-                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\f103c8t6_R2_keyboard\\Core\\Inc",
-                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\f103c8t6_R2_keyboard\\Drivers\\STM32F1xx_HAL_Driver\\Inc",
-                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\f103c8t6_R2_keyboard\\Drivers\\STM32F1xx_HAL_Driver\\Inc\\Legacy",
-                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\f103c8t6_R2_keyboard\\Drivers\\CMSIS\\Device\\ST\\STM32F1xx\\Include",
-                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\f103c8t6_R2_keyboard\\Drivers\\CMSIS\\Include",
-                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\f103c8t6_R2_keyboard\\MDK-ARM\\all",
-                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\f103c8t6_R2_keyboard\\MDK-ARM",
-                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\f103c8t6_R2_keyboard\\Core\\Src",
-                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\f103c8t6_R2_keyboard\\Drivers\\STM32F1xx_HAL_Driver\\Src"
+                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\sw_board_v2\\f103c8t6_R2_keyboard\\Core\\Inc",
+                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\sw_board_v2\\f103c8t6_R2_keyboard\\Drivers\\STM32F1xx_HAL_Driver\\Inc",
+                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\sw_board_v2\\f103c8t6_R2_keyboard\\Drivers\\STM32F1xx_HAL_Driver\\Inc\\Legacy",
+                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\sw_board_v2\\f103c8t6_R2_keyboard\\Middlewares\\Third_Party\\FreeRTOS\\Source\\include",
+                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\sw_board_v2\\f103c8t6_R2_keyboard\\Middlewares\\Third_Party\\FreeRTOS\\Source\\CMSIS_RTOS_V2",
+                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\sw_board_v2\\f103c8t6_R2_keyboard\\Middlewares\\Third_Party\\FreeRTOS\\Source\\portable\\RVDS\\ARM_CM3",
+                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\sw_board_v2\\f103c8t6_R2_keyboard\\Drivers\\CMSIS\\Device\\ST\\STM32F1xx\\Include",
+                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\sw_board_v2\\f103c8t6_R2_keyboard\\Drivers\\CMSIS\\Include",
+                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\sw_board_v2\\f103c8t6_R2_keyboard\\MDK-ARM\\all",
+                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\sw_board_v2\\f103c8t6_R2_keyboard\\MDK-ARM",
+                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\sw_board_v2\\f103c8t6_R2_keyboard\\Core\\Src",
+                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\sw_board_v2\\f103c8t6_R2_keyboard\\Drivers\\STM32F1xx_HAL_Driver\\Src",
+                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\sw_board_v2\\f103c8t6_R2_keyboard\\Middlewares\\Third_Party\\FreeRTOS\\Source",
+                "c:\\Users\\MikanseiP\\Desktop\\projectfiles\\LIMITI\\sw_board_v2\\f103c8t6_R2_keyboard\\Middlewares\\Third_Party\\FreeRTOS\\Source\\portable\\MemMang"
             ],
             "defines": [
                 "USE_HAL_DRIVER",
