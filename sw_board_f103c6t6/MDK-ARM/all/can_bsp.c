@@ -17,7 +17,7 @@ void CAN_Init(void)
 	sFilterConfig.FilterIdLow = 0x0000;
 	sFilterConfig.FilterMaskIdHigh = 0x0000;
 	sFilterConfig.FilterMaskIdLow = 0x0000;
-	sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+	sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO1;
 	sFilterConfig.FilterActivation = ENABLE;
 	sFilterConfig.SlaveStartFilterBank = 14; // meaningless
 	if (HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK)
@@ -32,7 +32,7 @@ void CAN_Init(void)
 		Error_Handler();
 	}
 	
-	if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK)
+	if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO1_MSG_PENDING) != HAL_OK)
 	{
 		/* Activation Error */
 		Error_Handler();

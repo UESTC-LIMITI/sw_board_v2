@@ -186,12 +186,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   }
 }
 
-void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {	
 		CAN_RxHeaderTypeDef RxMessage;
 	  uint8_t RxData[8] = {0};
 	
-	  HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxMessage, RxData);	
+	  HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &RxMessage, RxData);	
     
     intereacion_can_decode (RxMessage.StdId, RxData);
 }
