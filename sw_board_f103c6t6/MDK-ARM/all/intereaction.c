@@ -2,14 +2,15 @@
  * @Author: xiayuan 1137542776@qq.com
  * @Date: 2024-06-11 08:54:07
  * @LastEditors: xiayuan 1137542776@qq.com
- * @LastEditTime: 2024-06-21 20:02:24
+ * @LastEditTime: 2024-06-24 13:57:17
  * @FilePath: \MDK-ARM\all\intereaction.c
  * @Description: 
  * 按键板V2 TODO：
- * 1. 不再使用急停按钮的版本，配置双按钮来启动，用一个灯表示下一次是急停/启动，定时器执行按键消抖/colddown
- * 2. 自检亮灯
- * 3. ws2812监测DT35在线状态
- * 4. 需要开线程了，按键扫描 can发送 LED和WS2812控制
+ * 1. 不再使用急停按钮的版本，配置双按钮来启动，用一个灯表示下一次是急停/启动，定时器执行按键消抖/colddown done
+ * 2. 自检亮灯 done
+ * 3. ws2812监测DT35在线状态 done
+ * 4. 需要开线程了，按键扫描 can发送 LED和WS2812控制 done
+ * 5. 亮灯表示下一次按软件急停是启动还是急停
  * Copyright (c) 2024 by UESTC_LIMITI, All Rights Reserved. 
  */
 #include "intereaction.h"
@@ -118,7 +119,7 @@ void intereaction_scan_sw(void) {
 }
 
 //按照飞书文档来
-uint8_t buffer[2];
+uint8_t buffer[3];
 void intereaction_send_can_message(uint8_t index) {
 	uint16_t stdid = 0;
   HAL_CAN_Start(&hcan); // 开启CAN
@@ -140,7 +141,12 @@ void intereaction_send_can_message(uint8_t index) {
 		} else {
 			buffer[1] = 0x01;
 		}
-		CAN_Send_Message (stdid, buffer, 2);
+		if (switches.self_check) {
+			buffer[2] = 0x02;
+		} else {
+			buffer[2] = 0x01;
+		}
+		CAN_Send_Message (stdid, buffer, 3);
 		break;
 	
 	case 2:
@@ -243,13 +249,6 @@ void intereacion_can_decode (uint32_t stdid, uint8_t *Rxdata) {
 }
 
 void intereacion_dt35_offline_check (void) {
-	ack.dt35_1_online = false;
-	ack.dt35_2_online = false;
-	ack.dt35_3_online = false;
-	ack.dt35_4_online = false;
-	ack.dt35_5_online = false;
-	ack.dt35_6_online = false;
-	osDelay(100);  //延时等待接收
 	if (!ack.dt35_1_online) {
 		dt35_offline_id = 1;
 	} 
@@ -271,10 +270,10 @@ void intereacion_dt35_offline_check (void) {
 	else dt35_offline_id = 0;
   if (dt35_offline_id > 0) {
     for (int i = dt35_offline_id; i; i--) {
-      ws2812_set_color_1(255/3,23/3,49/3, 1);
+      ws2812_set_color_1(255/4,23/4,49/4, 1);
       ws2812_send_buffer1();
       osDelay(200);
-      ws2812_set_color_1(128/3,224/3,0, 1);
+      ws2812_set_color_1(128/4,224/4,0, 1);
       ws2812_send_buffer1();
       osDelay(200);
       }
@@ -285,6 +284,17 @@ void intereacion_dt35_offline_check (void) {
 /*****************************RGB控制**************************** */
 
 void intereacion_led_control (void) {
+	ack.dt35_1_online = false;
+	ack.dt35_2_online = false;
+	ack.dt35_3_online = false;
+	ack.dt35_4_online = false;
+	ack.dt35_5_online = false;
+	ack.dt35_6_online = false;
+	ack.robotoc_arm_com_ack = false;
+	ack.chassis_com_ack = false;
+	ack.take_in_com_ack = false;
+	ack.usb2can_com_ack = false;
+	osDelay(200);  //延时等待接收
 //	if (ack.chassis_com_ack) {
 //		HAL_GPIO_WritePin(CHASSIS_LED_GPIO_Port, CHASSIS_LED_Pin, GPIO_PIN_SET);
 //	} else {
