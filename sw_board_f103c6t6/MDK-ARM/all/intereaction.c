@@ -2,7 +2,7 @@
  * @Author: xiayuan 1137542776@qq.com
  * @Date: 2024-06-11 08:54:07
  * @LastEditors: xiayuan 1137542776@qq.com
- * @LastEditTime: 2024-06-24 13:57:17
+ * @LastEditTime: 2024-06-24 14:38:19
  * @FilePath: \MDK-ARM\all\intereaction.c
  * @Description: 
  * 按键板V2 TODO：
@@ -313,6 +313,14 @@ void intereacion_led_control (void) {
 //		HAL_GPIO_WritePin(ROBOTIC_ARM_LED_GPIO_Port, ROBOTIC_ARM_LED_Pin, GPIO_PIN_RESET);
 //	}
   //6.22风水轮流转版本
+	if (switches.start) {
+  		ws2812_set_color_1(227/4,119/4,20/4, 2);
+	}
+	else if (switches.stop) {
+  		ws2812_set_color_1(21/4,56/4,135/4, 2);
+	}
+    ws2812_send_buffer1();
+
 	if (ack.robotoc_arm_com_ack) {
 		HAL_GPIO_WritePin(CHASSIS_LED_GPIO_Port, CHASSIS_LED_Pin, GPIO_PIN_SET);
 	} else {
