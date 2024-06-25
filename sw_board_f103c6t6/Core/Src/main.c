@@ -103,7 +103,7 @@ int main(void)
   CAN_Init();
   delay_us_init();
   ws2812_set_color_1(128/4,224/4,0, 1);
-  ws2812_set_color_1(227/4,119/4,20/4, 2);
+//  ws2812_set_color_1(227/4,119/4,20/4, 2);
   ws2812_send_buffer1();
   switches.start = true; //让第�?次按下变成stop
   HAL_TIM_Base_Start_IT(&htim3);
