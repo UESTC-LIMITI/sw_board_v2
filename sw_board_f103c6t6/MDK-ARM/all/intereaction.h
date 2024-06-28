@@ -26,6 +26,7 @@
 #define STOP 0x02
 #define SELF_CHECK 0x03
 #define VISTION_RESTART_2 0x004
+#define WAITING_CHOICE 0x004
 #define VISTION_RESTART_1 0x006
 #define GO_TO_POINT_X 0x05
 #define AREA 0x05

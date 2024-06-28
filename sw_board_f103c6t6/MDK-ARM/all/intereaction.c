@@ -160,8 +160,13 @@ void intereaction_send_can_message(uint8_t index) {
 		break;
 
 	case 4:
-		stdid = VISTION_RESTART_2;
-		CAN_Send_Message (stdid, NULL, 0);
+		stdid = WAITING_CHOICE;
+    if (HAL_GPIO_ReadPin(VISION_START_2_GPIO_Port, VISION_START_2_Pin) == GPIO_PIN_SET) {
+      buffer[0] = 0x01;
+    } else {
+      buffer[0] = 0x00;
+    }
+		CAN_Send_Message (stdid, buffer, 1);
 		break;
 
 	case 5:
@@ -314,7 +319,7 @@ void intereacion_led_control (void) {
 //	}
   //6.22风水轮流转版本
 	if (switches.start) {
-  		ws2812_set_color_1(227/4,119/4,20/4, 2);
+  		ws2812_set_color_1(255/2,0,0, 2);
 	}
 	else if (switches.stop) {
   		ws2812_set_color_1(21/4,56/4,135/4, 2);

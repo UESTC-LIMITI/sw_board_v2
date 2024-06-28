@@ -62,7 +62,7 @@ typedef struct
 	uint8_t B;
 }RGB_Color_TypeDef;
  
-#define WS2812_NUM 2  
+#define WS2812_NUM 4  
 #define RESET_NUM 225
 #define BUFFER_NUM RESET_NUM + WS2812_NUM*24
 

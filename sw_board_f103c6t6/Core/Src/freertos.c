@@ -167,6 +167,8 @@ void CAN_send(void const * argument)
       period_count = 0;
       intereaction_send_can_message(5);
       osDelay(1);
+      intereaction_send_can_message(4);
+      osDelay(1);
     }
     if (switches.start_send_trigger) {
       switches.start_send_trigger = false;
