@@ -176,6 +176,9 @@ void CAN_send(void const * argument)
         intereaction_send_can_message(1);
         osDelay(1);
       }
+	  if (!pick_point_trigger) {
+		pick_point_trigger = true;
+	  }
     }
     else if (switches.stop_send_trigger) {
        switches.stop_send_trigger = false;

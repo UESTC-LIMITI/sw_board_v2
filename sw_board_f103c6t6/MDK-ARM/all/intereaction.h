@@ -79,5 +79,5 @@ extern int32_t start_count;
 // extern uint32_t start_count_2;
 extern acknowledge_t ack;
 extern int32_t dt35_offline_count;
-
+extern bool pick_point_trigger;
 #endif

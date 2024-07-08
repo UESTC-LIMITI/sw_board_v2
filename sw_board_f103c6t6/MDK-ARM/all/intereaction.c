@@ -25,7 +25,7 @@ int32_t dt35_offline_id = 0;
 // uint32_t stop_count_2 = 0;
 // uint32_t start_count_2 = 0;
 acknowledge_t ack = {false};
-
+bool pick_point_trigger = false;
 
 void intereaction_scan_sw(void) {
 	switches_t *s = &switches;
@@ -136,10 +136,14 @@ void intereaction_send_can_message(uint8_t index) {
 		} else {
 		buffer[0] = 0x00;
 		}
-		if (switches.pick_point_2) {
-			buffer[1] = 0x02;
+		if (!pick_point_trigger) {
+			if (switches.pick_point_2) {
+				buffer[1] = 0x02;
+			} else {
+				buffer[1] = 0x01;
+			}
 		} else {
-			buffer[1] = 0x01;
+			buffer[1] = 0x00;
 		}
 		if (switches.self_check) {
 			buffer[2] = 0x02;
