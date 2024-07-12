@@ -26,6 +26,7 @@ int32_t dt35_offline_id = 0;
 // uint32_t start_count_2 = 0;
 acknowledge_t ack = {false};
 bool pick_point_trigger = false;
+bool usb2can_led_blink_flag = false;
 
 void intereaction_scan_sw(void) {
 	switches_t *s = &switches;
@@ -204,9 +205,13 @@ void intereacion_can_decode (uint32_t stdid, uint8_t *Rxdata) {
 			break;
 			
 		case 0x011:
-			ack.usb2can_com_ack = true;
+			ack.usb2can_com_ack_2 = true;
 			break;
-			
+					
+		case 0x013:
+			ack.usb2can_com_ack_1 = true;
+			break;
+					
 		case 0x123:
 			ack.chassis_com_ack = true;
 			break;
@@ -302,7 +307,8 @@ void intereacion_led_control (void) {
 	ack.robotoc_arm_com_ack = false;
 	ack.chassis_com_ack = false;
 	ack.take_in_com_ack = false;
-	ack.usb2can_com_ack = false;
+	ack.usb2can_com_ack_1 = false;
+	ack.usb2can_com_ack_2 = false;
 	osDelay(200);  //延时等待接收
 //	if (ack.chassis_com_ack) {
 //		HAL_GPIO_WritePin(CHASSIS_LED_GPIO_Port, CHASSIS_LED_Pin, GPIO_PIN_SET);
@@ -348,10 +354,14 @@ void intereacion_led_control (void) {
 		HAL_GPIO_WritePin(ROBOTIC_ARM_LED_GPIO_Port, ROBOTIC_ARM_LED_Pin, GPIO_PIN_RESET);
 	}
   
-	if (ack.usb2can_com_ack) {
+	if (ack.usb2can_com_ack_2) {
 		HAL_GPIO_WritePin(COMM_LED_GPIO_Port, COMM_LED_Pin, GPIO_PIN_SET);
+		usb2can_led_blink_flag = false;
+	} else if (ack.usb2can_com_ack_1) {
+		usb2can_led_blink_flag = true;
 	} else {
 		HAL_GPIO_WritePin(COMM_LED_GPIO_Port, COMM_LED_Pin, GPIO_PIN_RESET);
+		usb2can_led_blink_flag = false;
 	}
 
 	intereacion_dt35_offline_check();

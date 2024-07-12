@@ -53,7 +53,8 @@ typedef struct {
 typedef struct {
 	bool chassis_config_ack;
 	bool chassis_com_ack;
-	bool usb2can_com_ack;
+	bool usb2can_com_ack_1;
+	bool usb2can_com_ack_2;
 	bool take_in_com_ack;
 	bool robotoc_arm_com_ack;
 	bool dt35_1_online;
@@ -80,4 +81,5 @@ extern int32_t start_count;
 extern acknowledge_t ack;
 extern int32_t dt35_offline_count;
 extern bool pick_point_trigger;
+extern bool usb2can_led_blink_flag;
 #endif
