@@ -221,6 +221,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 0 */
 	static int32_t blink_count = 0;
   if (htim == &htim3) {
+    //???????
     if (start_count > 0) {
       if (HAL_GPIO_ReadPin(STOP_GPIO_Port, STOP_Pin) == GPIO_PIN_SET || HAL_GPIO_ReadPin(STOP_2_GPIO_Port, STOP_2_Pin) == GPIO_PIN_SET) {
         start_count--;
@@ -245,17 +246,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       }
       else {stop_count = 0;}
     }
-	if (usb2can_led_blink_flag) {
-		blink_count++;
-		if (blink_count > 400) {
-			blink_count = 0;
-		}
-		if (blink_count > 0 && blink_count <= 200) {
-			HAL_GPIO_WritePin(COMM_LED_GPIO_Port, COMM_LED_Pin, GPIO_PIN_RESET);
-		} else if (blink_count > 200 && blink_count <= 400) {
-			HAL_GPIO_WritePin(COMM_LED_GPIO_Port, COMM_LED_Pin, GPIO_PIN_SET);
-		}
-	}
+
+    //?????????
+    if (usb2can_led_blink_flag) {
+      blink_count++;
+      if (blink_count > 400) {
+        blink_count = 0;
+      }
+      if (blink_count > 0 && blink_count <= 200) {
+        HAL_GPIO_WritePin(COMM_LED_GPIO_Port, COMM_LED_Pin, GPIO_PIN_RESET);
+      } else if (blink_count > 200 && blink_count <= 400) {
+        HAL_GPIO_WritePin(COMM_LED_GPIO_Port, COMM_LED_Pin, GPIO_PIN_SET);
+      }
+    }
+
+    //dt35???????
+    if (dt35_init_waiting_count < 5000) {
+      dt35_init_waiting_count++;
+    }
+
   }
 
   /* USER CODE END Callback 0 */

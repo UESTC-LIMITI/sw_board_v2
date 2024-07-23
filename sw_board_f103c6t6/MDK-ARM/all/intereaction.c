@@ -2,7 +2,7 @@
  * @Author: xiayuan 1137542776@qq.com
  * @Date: 2024-06-11 08:54:07
  * @LastEditors: xiayuan 1137542776@qq.com
- * @LastEditTime: 2024-06-24 14:38:19
+ * @LastEditTime: 2024-07-23 17:17:12
  * @FilePath: \MDK-ARM\all\intereaction.c
  * @Description: 
  * 按键板V2 TODO：
@@ -262,38 +262,48 @@ void intereacion_can_decode (uint32_t stdid, uint8_t *Rxdata) {
 	}
 }
 
+int dt35_init_waiting_count = 0;
+bool dt35_offline_status[6] = {false};
 void intereacion_dt35_offline_check (void) {
-	if (!ack.dt35_1_online) {
+	if (dt35_init_waiting_count < 5000) {  //上电5s内不进行dt35检测
+		return;
+	} 
+
+	//只要掉线一次就会自锁和记录状态
+	if (!ack.dt35_1_online || dt35_offline_status[0]) {
+		dt35_offline_status[0] = true;
 		dt35_offline_id = 1;
 	} 
-	else if (!ack.dt35_2_online) {
+	if (!ack.dt35_2_online || dt35_offline_status[1]) {
+		dt35_offline_status[1] = true;
 		dt35_offline_id = 2;
 	}
-	else if (!ack.dt35_3_online) {
+	if (!ack.dt35_3_online || dt35_offline_status[2]) {
+		dt35_offline_status[2] = true;
 		dt35_offline_id = 3;
 	}
-	else if (!ack.dt35_4_online) {
+	if (!ack.dt35_4_online || dt35_offline_status[3]) {
+		dt35_offline_status[3] = true;
 		dt35_offline_id = 4;
 	}
-	else if (!ack.dt35_5_online) {
+	if (!ack.dt35_5_online || dt35_offline_status[4]) {
+		dt35_offline_status[4] = true;
 		dt35_offline_id = 5;
 	}
-	else if (!ack.dt35_6_online) {
+	if (!ack.dt35_6_online || dt35_offline_status[5]) {
+		dt35_offline_status[5] = true;
 		dt35_offline_id = 6;
 	}
-	else dt35_offline_id = 0;
-  if (dt35_offline_id > 0) {
-    for (int i = dt35_offline_id; i; i--) {
-      ws2812_set_color_1(255/4,23/4,49/4, 1);
-      ws2812_send_buffer1();
-      osDelay(200);
-      ws2812_set_color_1(128/4,224/4,0, 1);
-      ws2812_send_buffer1();
-      osDelay(200);
-      }
-      osDelay(500);
-    }
 }
+
+// void intereacion_dt35_offline_detection_init (void) {
+// 	memset(&ack, false, sizeof(ack));
+// 	HAL_Delay(2000);
+// 	if (!(ack.dt35_1_online && ack.dt35_2_online && ack.dt35_3_online && ack.dt35_4_online && ack.dt35_5_online && ack.dt35_6_online)) {
+// 		if (!ack.dt35_1_online)
+// 	}
+
+// }
 
 /*****************************RGB控制**************************** */
 

@@ -82,4 +82,7 @@ extern acknowledge_t ack;
 extern int32_t dt35_offline_count;
 extern bool pick_point_trigger;
 extern bool usb2can_led_blink_flag;
+extern int32_t dt35_init_waiting_count;
+extern bool dt35_offline_status[6];
+extern int32_t dt35_offline_id;
 #endif

@@ -142,7 +142,79 @@ void StartDefaultTask(void const * argument)
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */
   for(;;)
-  {
+  { 
+    //默认任务用来dt35闪灯吧
+    //顺序闪灯，先小后大
+    if (dt35_offline_status[0] + dt35_offline_status[1] + dt35_offline_status[2] + dt35_offline_status[3] + dt35_offline_status[4] + dt35_offline_status[5]) {
+      if (dt35_offline_status[0]) {
+        for (int i = 1; i; i--) {
+          ws2812_set_color_1(255/4,23/4,49/4, 1);
+          ws2812_send_buffer1();
+          osDelay(200);
+          ws2812_set_color_1(128/4,224/4,0, 1);
+          ws2812_send_buffer1();
+          osDelay(200);
+          }
+          osDelay(500);
+      }
+      if (dt35_offline_status[1]) {
+        for (int i = 2; i; i--) {
+          ws2812_set_color_1(255/4,23/4,49/4, 1);
+          ws2812_send_buffer1();
+          osDelay(200);
+          ws2812_set_color_1(128/4,224/4,0, 1);
+          ws2812_send_buffer1();
+          osDelay(200);
+          }
+          osDelay(500);
+      }
+      if (dt35_offline_status[2]) {
+        for (int i = 3; i; i--) {
+          ws2812_set_color_1(255/4,23/4,49/4, 1);
+          ws2812_send_buffer1();
+          osDelay(200);
+          ws2812_set_color_1(128/4,224/4,0, 1);
+          ws2812_send_buffer1();
+          osDelay(200);
+          }
+          osDelay(500);
+      }
+      if (dt35_offline_status[3]) {
+        for (int i = 4; i; i--) {
+          ws2812_set_color_1(255/4,23/4,49/4, 1);
+          ws2812_send_buffer1();
+          osDelay(200);
+          ws2812_set_color_1(128/4,224/4,0, 1);
+          ws2812_send_buffer1();
+          osDelay(200);
+          }
+          osDelay(500);
+      }
+      if (dt35_offline_status[4]) {
+        for (int i = 5; i; i--) {
+          ws2812_set_color_1(255/4,23/4,49/4, 1);
+          ws2812_send_buffer1();
+          osDelay(200);
+          ws2812_set_color_1(128/4,224/4,0, 1);
+          ws2812_send_buffer1();
+          osDelay(200);
+          }
+          osDelay(500);
+      }
+      if (dt35_offline_status[5]) {
+        for (int i = 6; i; i--) {
+          ws2812_set_color_1(255/4,23/4,49/4, 1);
+          ws2812_send_buffer1();
+          osDelay(200);
+          ws2812_set_color_1(128/4,224/4,0, 1);
+          ws2812_send_buffer1();
+          osDelay(200);
+          }
+          osDelay(500);
+      }
+      osDelay(300);
+    }
+
     osDelay(1);
   }
   /* USER CODE END StartDefaultTask */
